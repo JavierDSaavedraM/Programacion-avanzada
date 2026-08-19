@@ -52,27 +52,26 @@ bool Validar_Dominio(string dominio){
         return false;
     }
     
-    pattern = regex(R"([^\da-z_.])");
+    pattern = regex(R"([^a-z.])");
     if (regex_search(dominio,match,pattern))
     {  
         cout << "Error, el dominio no puede contener un caracter que no sea una letra minuscula, un numero o un punto" << endl;
         return false;
     }
 
-    pattern = regex(R"(.{0,1})");
+    pattern = regex(R"(\..*\.)");
     if (regex_search(dominio,match,pattern))
     {  
         cout << "Error, el dominio no puede contener mas de 1 punto" << endl;
         return false;
     }
 
-    pattern = regex(R"(^.$.)");
+    pattern = regex(R"(^\.|\.$)");
     if (regex_search(dominio,match,pattern))
     {  
         cout << "Error, en el dominio el punto no puede ser el primer ni el último carácter del dominio" << endl;
         return false;
     }
-
     return true;
 }
 
@@ -80,8 +79,8 @@ int main(){
     vector<string> candidatos1 = {"juan_perez@mail.com", "1ana@mail.com", "luis__m@tech.net", "maria@.com", "carlos_@domain.org", "z@a.b"};
     vector<string> candidatos2 = {"admin@sys.com", "root@sys.com", "test@otro.dominio.com", "admin@sys..com"};
     vector<string> candidatos3 = {"@sinusuario.com", "usuario_largo_que_pasa_de_veinte_caracteres@mail.com", "user@tech.", "us3r_n4me@domain.mx"};
-    for (int i = 0; i < candidatos2.size(); i++) {
-        string correo = candidatos2[i];
+    for (int i = 0; i < candidatos1.size(); i++) {
+        string correo = candidatos1[i];
         int ubicacion = correo.find('@');
         if (ubicacion == -1) {
             cout << "error, el correo debe de contener un '@'" << endl;
