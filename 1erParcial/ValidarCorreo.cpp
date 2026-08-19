@@ -69,7 +69,7 @@ bool Validar_Dominio(string dominio){
     pattern = regex(R"(^\.|\.$)");
     if (regex_search(dominio,match,pattern))
     {  
-        cout << "Error, el dominio '"<< dominio << "' el punto no puede ser el primer ni el último carácter del dominio" << endl;
+        cout << "Error, el dominio '"<< dominio << "' el punto no puede ser el primer ni el ultimo caracter del dominio" << endl;
         return false;
     }
     return true;
