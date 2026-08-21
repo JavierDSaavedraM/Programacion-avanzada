@@ -2,7 +2,7 @@
 CXX = g++
 TEST_SOURCES = test/main.cpp
 TARGET = main.exe
-SOURCES = ordenar_una_cadena_V3.cpp
+SOURCES = 1erParcial/ValidarCorreo.cpp
 
 all: $(TARGET) run clean
 test: exp run clean

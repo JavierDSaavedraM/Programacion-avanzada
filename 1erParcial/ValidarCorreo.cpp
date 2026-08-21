@@ -1,9 +1,9 @@
 /*
-Roberto De la Fuente 593303
-Javier Djorkaef Saavedra Mendiola 624198
-Sergio Alejandro Zamora Dávila 616148
-Declaramos haber realizado esta actividad con integridad académica
-*/
+   Roberto De la Fuente 593303
+   Javier Djorkaef Saavedra Mendiola 624198
+   Sergio Alejandro Zamora Dávila 616148
+   Declaramos haber realizado esta actividad con integridad académica
+   */
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@ bool Validar_Usuario(string usuario, string& razon){
         razon = "el usuario no tiene caracteres";
         return false;
     }
-    
+
     if (usuario.size() > 20) {
         razon = "el usuario supera los 20 caracteres de longitud";
         return false;
@@ -55,7 +55,7 @@ bool Validar_Dominio(string dominio, string& razon){
         razon = "el dominio no puede contener letras mayusculas";
         return false;
     }
-    
+
     pattern = regex(R"([^a-z.])");
     if (regex_search(dominio,match,pattern)) {  
         razon = "el dominio solo puede contener letras minusculas y un punto";
@@ -81,74 +81,53 @@ bool Validar_Dominio(string dominio, string& razon){
     return true;
 }
 
-int main(){
-    vector<string> candidatos1 = {"juan_perez@mail.com", "1ana@mail.com", "luis__m@tech.net", "maria@.com", "carlos_@domain.org", "z@a.b"};
-    vector<string> candidatos2 = {"admin@sys.com", "root@sys.com", "test@otro.dominio.com", "admin@sys..com"};
-    vector<string> candidatos3 = {"@sinusuario.com", "usuario_largo_que_pasa_de_veinte_caracteres@mail.com", "user@tech.", "us3r_n4me@domain.mx"};
-    
-    // Se separan los correctos de los incorrectos
-    vector<string> correctos;
-    vector<pair<string, string>> erroneos;
-    vector<vector<string>> grupos = {candidatos1, candidatos2, candidatos3};
+void validarExpresiones(vector<string>& p_correos){
+    regex patron(R"(^(?!.*__)[a-z](?:[a-z0-9_]{0,18}[a-z0-9])?@[a-z]+\.[a-z]+$)");
+    vector<string> correos_correctos;
+    vector<string> correos_erroneos;
 
-    // Los correos se clasifican una vez y se conserva la seccion que fallo con su razon.
-    for (const vector<string>& grupo : grupos) {
-        for (const string& correo : grupo) {
-            size_t ubicacion = correo.find('@');
-            if (ubicacion == string::npos || correo.find('@', ubicacion + 1) != string::npos) {
-                erroneos.push_back({correo, "el correo debe tener exactamente un '@'"});
-                continue;
-            }
-
-            string usuario = correo.substr(0, ubicacion);
-            string dominio = correo.substr(ubicacion + 1);
-            string razon;
-            if (!Validar_Usuario(usuario, razon)) {
-                erroneos.push_back({usuario, razon});
-            } else if (!Validar_Dominio(dominio, razon)) {
-                erroneos.push_back({dominio, razon});
-            } else {
-                correctos.push_back(correo);
-            }
-        }
+    for (const string & correo: p_correos){
+    // Los correos se clasifican una vez y se separan los correctos de los incorrectos
+        if (regex_match(correo,patron))
+            correos_correctos.push_back(correo);
+        else 
+            correos_erroneos.push_back(correo);
     }
+    cout << "Correos validos:\n [";
+    for (const string& correo : correos_correctos) 
+        cout << "\""<< correo << "\" ";
+    cout << "]" << endl;
 
-    cout << "Correos validos:" << endl;
-    for (const string& correo : correctos) {
-        cout << correo << endl;
-    }
-
-    cout << "\nCorreos invalidos:" << endl;
-    for (const pair<string, string>& error : erroneos) {
-        cout << "\"" << error.first << "\": Invalido (" << error.second << ")." << endl;
-    }
-    
-
-    /*
-
-
-    regex pattern(R"(^(?!.*__)[a-z](?:[a-z0-9_]{0,18}[a-z0-9])?@[a-z]+\.[a-z]+$)");
-
-    vector<string> candidatos1 = {"juan_perez@mail.com", "1ana@mail.com", "luis__m@tech.net", "maria@.com", "carlos_@domain.org", "z@a.b"};
-    vector<string> candidatos2 = {"admin@sys.com", "root@sys.com", "test@otro.dominio.com", "admin@sys..com"};
-    vector<string> candidatos3 = {"@sinusuario.com", "usuario_largo_que_pasa_de_veinte_caracteres@mail.com", "user@tech.", "us3r_n4me@domain.mx"};
-    vector<string> erroneos = {};
-    smatch match;
-    cout << "Los correos correctos son: " << endl;
-    for (int i = 0; i < candidatos1.size(); i++) {
-        if (regex_search(candidatos1[i],match,pattern))
-        {
-            cout << match.str() << endl;
+    cout << "Correos invalidos:" << endl;
+    for (const string & correo: correos_erroneos){
+        // se separan el usuario del dominio para obtener la razon de fallo
+        size_t ubicacion = correo.find('@');
+        string usuario = correo.substr(0, ubicacion);
+        string dominio = correo.substr(ubicacion + 1);
+        string razon;
+        cout << "- \"" << correo << "\" Invalido ( ";
+        if (!Validar_Usuario(usuario, razon)) {
+            cout << razon;
+        } else if (!Validar_Dominio(dominio, razon)) {
+            cout << razon;
         } else {
-            erroneos.push_back(candidatos1[i]);
+            cout << "Otro error";
         }
+        cout << " )" << endl;
     }
 
-    cout << endl << "Los correos incorrectos son: " << endl;
-    for (int i = 0; i < erroneos.size(); i++)
-    {
-        cout << erroneos[i] << endl;
-    }
-    */
+    cout << endl;
+
+}
+
+
+int main(){
+    vector<string> caso1 = {"juan_perez@mail.com", "1ana@mail.com", "luis__m@tech.net", "maria@.com", "carlos_@domain.org", "z@a.b"};
+    vector<string> caso2 = {"admin@sys.com", "root@sys.com", "test@otro.dominio.com", "admin@sys..com"};
+    vector<string> caso3 = {"@sinusuario.com", "usuario_largo_que_pasa_de_veinte_caracteres@mail.com", "user@tech.", "us3r_n4me@domain.mx"};
+
+    validarExpresiones(caso1);
+    validarExpresiones(caso2);
+    validarExpresiones(caso3);
     return 0;
 }
