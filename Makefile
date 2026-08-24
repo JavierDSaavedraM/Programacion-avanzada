@@ -2,7 +2,7 @@
 CXX = g++
 TEST_SOURCES = test/main.cpp
 TARGET = main.exe
-SOURCES = 1erParcial/ValidarCorreo.cpp
+SOURCES = 1erParcial/LecturaJson.cpp
 
 all: $(TARGET) run clean
 test: exp run clean
