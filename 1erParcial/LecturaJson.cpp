@@ -313,12 +313,12 @@ vector<Persona> Parser::parsear_ArrayPersonas(){
         if (tokenActual == ",") {
             siguienteToken();
 
-            if (tokenActual == "}") {
+            if (tokenActual == "]") {
                 throw runtime_error("No se permite coma final");
             }
         }
-        else if (tokenActual != "}") {
-            throw runtime_error("Se esperaba ',' o '}'");
+        else if (tokenActual != "]") {
+            throw runtime_error("Se esperaba ',' o ']'");
         }
     }
     checarTokenActual("]");
