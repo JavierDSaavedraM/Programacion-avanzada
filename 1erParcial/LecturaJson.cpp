@@ -16,13 +16,12 @@ Damos nuestra palabra que hemos realizado esta actividad con integridad académi
 #include <fstream>
 using namespace std;
 
+
 #ifdef DEBUG
 #define LOG_DEBUG(msg) cout << "[DEBUG]" << msg << endl;
 #else
 #define LOG_DEBUG(msg)
 #endif
-
-string leerArchivo(const string& nombre_archivo);
 
 class Lexer{
     public:
@@ -95,7 +94,6 @@ void Lexer::Tokenizar(){
         }
     }
 }
-
 struct Contacto{ string email , telefono; };
 struct Empleo{ string puesto , empresa; };
 struct Detalles{
@@ -112,6 +110,7 @@ struct Persona{
 class Parser{
     public:
         Parser(const vector<string> & tokens){this->tokens = tokens; pos=0; tokenActual = tokens[pos];};
+        vector<Persona> parsear();
     private:
         vector<string> tokens;
         string tokenActual;
@@ -120,7 +119,7 @@ class Parser{
         vector<Persona> parsear_ArrayPersonas(); //array de personas
         Persona parsear_objPersona(); // obj
         Detalles parsear_objDetalles();
-        
+
         vector<Contacto> parsear_ArrayContactos();
         Contacto parsear_objContacto();
         string parsear_correo();
@@ -148,55 +147,60 @@ class Parser{
             if(tokenActual != s)
                 throw runtime_error("Error en el formato del archivo");
             else
-               siguienteToken();
+                siguienteToken();
         }
 };
+vector<Persona> Parser::parsear() {
+    Personas = parsear_ArrayPersonas();
 
-Detalles Parser::parsear_objDetalles() {
-    Detalles obj_actual;
-
-    checarTokenActual("{");
-
-    while (tokenActual != "}") {
-        string key = tokenActual;
-        siguienteToken();
-        checarTokenActual(":");
-        if (key == "contacto") {
-            if (tokenActual == "[") {
-                obj_actual.contactos = parsear_ArrayContactos();
-            }
-            else if (tokenActual == "{") {
-                obj_actual.contactos.push_back(parsear_objContacto());
-            }
-            else {
-                throw runtime_error("Formato invalido para contacto");
-            }
-        }
-        else if (key == "empleo") {
-            if (tokenActual == "[") {
-                obj_actual.empleos = parsear_ArrayEmpleos();
-            }
-            else if (tokenActual == "{") {
-                obj_actual.empleos.push_back(parsear_ObjEmpleo());
-            }
-            else {
-                throw runtime_error("Formato invalido para empleo");
-            }
-        }
-        else {
-            throw runtime_error("Llave no reconocida");
-        }
-        if (tokenActual == ",") {
-            siguienteToken();
-        }
-        else if (tokenActual != "}") {
-            throw runtime_error("Se esperaba ',' o '}'");
-        }
+    if (pos < tokens.size()) {
+        throw runtime_error("Hay contenido despues del JSON");
     }
 
-    checarTokenActual("}");
+    return Personas;
+}
 
-    return obj_actual;
+vector<Persona> Parser::parsear_ArrayPersonas(){
+    vector<Persona> personasArchivos;
+
+    checarTokenActual("[");
+    while(pos < tokens.size() && tokenActual != "]"){
+        personasArchivos.push_back(parsear_objPersona());
+        if (tokenActual == ",") {
+            siguienteToken();
+
+            if (tokenActual == "]") {
+                throw runtime_error("No se permite coma final");
+            }
+        }
+        else if (tokenActual != "]") {
+            throw runtime_error("Se esperaba ',' o ']'");
+        }
+    }
+    checarTokenActual("]");
+
+    return personasArchivos;
+}
+
+vector<Empleo> Parser::parsear_ArrayEmpleos(){
+    vector<Empleo> array_empleos;
+
+    checarTokenActual("[");
+    while(pos < tokens.size() && tokenActual != "]"){
+        array_empleos.push_back(parsear_ObjEmpleo());
+        if (tokenActual == ",") {
+            siguienteToken();
+
+            if (tokenActual == "]") {
+                throw runtime_error("No se permite coma final");
+            }
+        }
+        else if (tokenActual != "]") {
+            throw runtime_error("Se esperaba ',' o ']'");
+        }
+    }
+    checarTokenActual("]");
+    return array_empleos;
 }
 
 vector<Contacto> Parser::parsear_ArrayContactos(){
@@ -207,16 +211,46 @@ vector<Contacto> Parser::parsear_ArrayContactos(){
         array_contactos.push_back(parsear_objContacto());
         if (tokenActual == ",") {
             siguienteToken();
+
+            if (tokenActual == "]") {
+                throw runtime_error("No se permite coma final");
+            }
         }
         else if (tokenActual != "]") {
             throw runtime_error("Se esperaba ',' o ']'");
         }
     }
-    if (tokenActual != "]"){
-        throw runtime_error("Error en el formato del archivo");
-    }
     checarTokenActual("]");
     return array_contactos;
+}
+
+Detalles Parser::parsear_objDetalles() {
+    Detalles obj_actual;
+    checarTokenActual("{");
+    while (tokenActual != "}") {
+        string key = tokenActual;
+        siguienteToken();
+        checarTokenActual(":");
+        if (key == "contacto") {
+            if (tokenActual == "[") { obj_actual.contactos = parsear_ArrayContactos(); }
+            else if (tokenActual == "{") { obj_actual.contactos.push_back(parsear_objContacto()); }
+            else { throw runtime_error("Formato invalido para contacto"); }
+        }
+        else if (key == "empleo") {
+            if (tokenActual == "[") { obj_actual.empleos = parsear_ArrayEmpleos(); }
+            else if (tokenActual == "{") { obj_actual.empleos.push_back(parsear_ObjEmpleo()); }
+            else { throw runtime_error("Formato invalido para empleo"); }
+        }
+        else { throw runtime_error("Llave no reconocida"); }
+        if (tokenActual == ",") {
+            siguienteToken();
+            if (tokenActual == "}") { throw runtime_error("No se permite coma final"); }
+        } else if (tokenActual != "}") { throw runtime_error("Se esperaba ',' o '}'"); }
+    }
+
+    checarTokenActual("}");
+
+    return obj_actual;
 }
 
 Contacto Parser::parsear_objContacto(){
@@ -226,7 +260,6 @@ Contacto Parser::parsear_objContacto(){
     while(pos < tokens.size() && tokenActual != "}" ){
         string key = tokenActual;
         siguienteToken();
-
         if (key == "email"){ 
             checarTokenActual(":");
             obj_contacto.email = parsear_correo();
@@ -240,6 +273,10 @@ Contacto Parser::parsear_objContacto(){
         }
         if (tokenActual == ",") {
             siguienteToken();
+
+            if (tokenActual == "}") {
+                throw runtime_error("No se permite coma final");
+            }
         }
         else if (tokenActual != "}") {
             throw runtime_error("Se esperaba ',' o '}'");
@@ -283,49 +320,6 @@ Empleo Parser::parsear_ObjEmpleo(){
     return obj_empleo;
 }
 
-
-vector<Empleo> Parser::parsear_ArrayEmpleos(){
-    vector<Empleo> array_empleos;
-
-    checarTokenActual("[");
-    while(pos < tokens.size() && tokenActual != "]"){
-        array_empleos.push_back(parsear_ObjEmpleo());
-        if (tokenActual == ",") {
-            siguienteToken();
-        }
-        else if (tokenActual != "]") {
-            throw runtime_error("Se esperaba ',' o ']'");
-        }
-    }
-    if (tokenActual != "]"){
-        throw runtime_error("Error en el formato del archivo");
-    }
-    checarTokenActual("]");
-    return array_empleos;
-}
-
-vector<Persona> Parser::parsear_ArrayPersonas(){
-    vector<Persona> personasArchivos;
-
-    checarTokenActual("[");
-    while(pos < tokens.size() && tokenActual != "]"){
-        personasArchivos.push_back(parsear_objPersona());
-        if (tokenActual == ",") {
-            siguienteToken();
-
-            if (tokenActual == "]") {
-                throw runtime_error("No se permite coma final");
-            }
-        }
-        else if (tokenActual != "]") {
-            throw runtime_error("Se esperaba ',' o ']'");
-        }
-    }
-    checarTokenActual("]");
-
-    return personasArchivos;
-}
-
 Persona Parser::parsear_objPersona(){
     Persona obj_actual;
     checarTokenActual("{");
@@ -360,6 +354,10 @@ Persona Parser::parsear_objPersona(){
 
         if (tokenActual == ",") {
             siguienteToken();
+
+            if (tokenActual == "}") {
+                throw runtime_error("No se permite coma final");
+            }
         }
         else if (tokenActual != "}") {
             throw runtime_error("Se esperaba ',' o '}'");
@@ -379,7 +377,7 @@ int Parser::parsear_idEdad(){
 
 string Parser::parsear_nombreCiudadPuesto(){
     string valor = tokenActual;
-    regex patron(R"(^[\p{L}\w\s]+$)");
+    regex patron(R"(^[ñáíúéóÁÍÚÉÓ\w\s]+$)");
     if(!regex_match(valor,patron)){ throw runtime_error("Valor no es solo letras y acentos ");}
     siguienteToken();
     return valor;
@@ -387,7 +385,7 @@ string Parser::parsear_nombreCiudadPuesto(){
 
 string Parser::parsear_correo(){
     string valor = tokenActual;
-    regex patron(R"(^(?!.*__)[a-z](?:[a-z0-9_]{0,18}[a-z0-9])?@[a-z]+\.[a-z]+$)");
+    regex patron(R"(^(?!.*__)[a-z](?:[a-z0-9_\.]{0,18}[a-z0-9])?@[a-z]+\.[a-z]+$)");
     if(!regex_match(valor,patron)){ throw runtime_error("Correo no valido");}
     siguienteToken();
     return valor;
@@ -402,11 +400,15 @@ string Parser::parsear_telefono(){
 
 string Parser::parsear_empresa(){
     string valor = tokenActual;
-    regex patron(R"(^[\p{L}\w\s.,]+$)");
+    regex patron(R"(^[áíúéóÁÍÚÉÓ\w\s.,]+$)");
     if(!regex_match(valor,patron)){ throw runtime_error("Empresa no valido");}
     siguienteToken();
     return valor;
 }
+
+string leerArchivo(const string& nombre_archivo);
+
+
 
 int main(){
     string path_archivo = "./1erParcial/personas.json";
@@ -414,14 +416,22 @@ int main(){
         string c = leerArchivo(path_archivo);
         Lexer lexer(c);
         vector<string> t = lexer.obtenerTokens();
+        Parser parser(t);
+        vector<Persona> array_personas = parser.parsear();
 
-#ifdef DEBUG
-        for (const string& s: t){
-            cout << s ;
-            cout << ((s =="}" || s =="]") ? "\n" : " ");
+
+        for(const Persona p: array_personas){
+            for(const Contacto c: p.detalles.contactos){
+                cout << "id : " << p.id << endl;
+                cout << "nombre : " << p.nombre << endl;
+                cout << "- " <<  "edad : " << p.edad << endl;
+                cout << "- " <<  "ciudad : " << p.ciudad << endl;
+                cout << "- " <<  "detalles :" << endl;
+                cout << "-- " <<  "contacto :" << endl;
+                cout << "--- " <<  "email :" << c.email<< endl;
+                cout << "--- " <<  "telefono :" << c.telefono<< endl;
+            }
         }
-
-#endif // DEBUG
 
     } catch (const runtime_error& e) {
         cout << "Error: " << e.what() << endl;
