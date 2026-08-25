@@ -16,13 +16,14 @@ Damos nuestra palabra que hemos realizado esta actividad con integridad académi
 #include <fstream>
 using namespace std;
 
-
+// COUT PARA DEBUG
 #ifdef DEBUG
 #define LOG_DEBUG(msg) cout << "[DEBUG]" << msg << endl;
 #else
 #define LOG_DEBUG(msg)
 #endif
 
+// Lexer se encarga de leer el texto y separalo en tokens
 class Lexer{
     public:
         Lexer(const string & contenido){this->contenido = contenido; pos = 0; JSON_SYNTAX="[]{}:,"; Tokenizar();};
@@ -37,8 +38,7 @@ class Lexer{
         void lex_string();
         void lex_numero();
 };
-
-void Lexer::lex_numero(){
+void Lexer::lex_numero(){ // Metodo para validar que lo escrito sea un numero
     string json_numero;
     char caracter_actual = contenido[pos];
 
@@ -76,14 +76,13 @@ void Lexer::lex_string(){
     }
 };
 
+// Metodo para tokenizar (filtra los caracters para encontrar el sytaxis de JSON o las llaves y sus valores)
 void Lexer::Tokenizar(){
     while(pos < contenido.length()){
         char caracter_actual = contenido[pos];
-        LOG_DEBUG(caracter_actual);
         if (caracter_actual == '\"') {lex_string(); continue;};
         if (isdigit(caracter_actual)) {lex_numero(); continue;};
-
-        if(JSON_SYNTAX.find(caracter_actual) != -1){
+        if(JSON_SYNTAX.find(caracter_actual) != -1){ 
             tokens.push_back(string(1,caracter_actual));
             pos++;
         } else if (isspace(caracter_actual)){
@@ -94,6 +93,8 @@ void Lexer::Tokenizar(){
         }
     }
 }
+
+// Structuras para representar la informacion.
 struct Contacto{ string email , telefono; };
 struct Empleo{ string puesto , empresa; };
 struct Detalles{
@@ -107,6 +108,8 @@ struct Persona{
     Detalles detalles;
 };
 
+// Clase parser 
+// Se encarga de tomar los tokens y distinguir los objetos y arrays
 class Parser{
     public:
         Parser(const vector<string> & tokens){this->tokens = tokens; pos=0; tokenActual = tokens[pos];};
@@ -119,27 +122,21 @@ class Parser{
         vector<Persona> parsear_ArrayPersonas(); //array de personas
         Persona parsear_objPersona(); // obj
         Detalles parsear_objDetalles();
-
         vector<Contacto> parsear_ArrayContactos();
         Contacto parsear_objContacto();
         string parsear_correo();
         string parsear_telefono();
-
         vector<Empleo> parsear_ArrayEmpleos();
         Empleo parsear_ObjEmpleo();
         string parsear_empresa();
-
         string parsear_nombreCiudadPuesto();
         int parsear_idEdad();
-
         void siguienteToken() {
             ++pos;
-
             if (pos >= tokens.size()) {
                 tokenActual = "";
                 return;
             }
-
             tokenActual = tokens[pos];
         }
 
@@ -150,47 +147,46 @@ class Parser{
                 siguienteToken();
         }
 };
+
+
+// Metodo publico que se encarga de obtener el array.
 vector<Persona> Parser::parsear() {
     Personas = parsear_ArrayPersonas();
-
     if (pos < tokens.size()) {
         throw runtime_error("Hay contenido despues del JSON");
     }
-
     return Personas;
 }
 
+// Metodo que guarda los arrays 
 vector<Persona> Parser::parsear_ArrayPersonas(){
     vector<Persona> personasArchivos;
-
-    checarTokenActual("[");
+    checarTokenActual("["); 
+    // Recorre el arreglo hasta que termine el archivo creando objetos de personas.
     while(pos < tokens.size() && tokenActual != "]"){
-        personasArchivos.push_back(parsear_objPersona());
-        if (tokenActual == ",") {
+        personasArchivos.push_back(parsear_objPersona()); // Llamada a otra funcion que se encarga de los obj de persona
+        if (tokenActual == ",") { // Si encuentra una coma significa que hay otro objeto
             siguienteToken();
-
-            if (tokenActual == "]") {
+            if (tokenActual == "]") { //Si es un ] significa que esta mal escrito.
                 throw runtime_error("No se permite coma final");
             }
         }
-        else if (tokenActual != "]") {
+        else if (tokenActual != "]") { //Si no significa que leyo todos los objetos.
             throw runtime_error("Se esperaba ',' o ']'");
         }
     }
     checarTokenActual("]");
-
     return personasArchivos;
 }
 
+// similar a personas pero por si existe mas empleados.
 vector<Empleo> Parser::parsear_ArrayEmpleos(){
     vector<Empleo> array_empleos;
-
     checarTokenActual("[");
     while(pos < tokens.size() && tokenActual != "]"){
         array_empleos.push_back(parsear_ObjEmpleo());
         if (tokenActual == ",") {
             siguienteToken();
-
             if (tokenActual == "]") {
                 throw runtime_error("No se permite coma final");
             }
@@ -203,9 +199,9 @@ vector<Empleo> Parser::parsear_ArrayEmpleos(){
     return array_empleos;
 }
 
+// Se encarga de crear un arreglo de contactos
 vector<Contacto> Parser::parsear_ArrayContactos(){
     vector<Contacto> array_contactos;
-
     checarTokenActual("[");
     while(pos < tokens.size() && tokenActual != "]"){
         array_contactos.push_back(parsear_objContacto());
@@ -406,41 +402,6 @@ string Parser::parsear_empresa(){
     return valor;
 }
 
-string leerArchivo(const string& nombre_archivo);
-
-
-
-int main(){
-    string path_archivo = "./1erParcial/personas.json";
-    try {
-        string c = leerArchivo(path_archivo);
-        Lexer lexer(c);
-        vector<string> t = lexer.obtenerTokens();
-        Parser parser(t);
-        vector<Persona> array_personas = parser.parsear();
-
-
-        for(const Persona p: array_personas){
-            for(const Contacto c: p.detalles.contactos){
-                cout << "id : " << p.id << endl;
-                cout << "nombre : " << p.nombre << endl;
-                cout << "- " <<  "edad : " << p.edad << endl;
-                cout << "- " <<  "ciudad : " << p.ciudad << endl;
-                cout << "- " <<  "detalles :" << endl;
-                cout << "-- " <<  "contacto :" << endl;
-                cout << "--- " <<  "email :" << c.email<< endl;
-                cout << "--- " <<  "telefono :" << c.telefono<< endl;
-            }
-        }
-
-    } catch (const runtime_error& e) {
-        cout << "Error: " << e.what() << endl;
-
-    }
-
-    return 0;
-}
-
 string leerArchivo(const string & nombre_archivo){
     ifstream archivo(nombre_archivo);
 
@@ -452,3 +413,40 @@ string leerArchivo(const string & nombre_archivo){
 
     return contenido;
 }
+
+int main(){
+    string path_archivo = "./1erParcial/personas.json";
+    try {
+        string c = leerArchivo(path_archivo);
+        Lexer lexer(c);
+        vector<string> t = lexer.obtenerTokens();
+        Parser parser(t);
+        vector<Persona> array_personas = parser.parsear();
+        for (const Persona& p : array_personas) {
+            cout << "id: " << p.id << '\n'
+                << "- nombre: " << p.nombre << '\n'
+                << "- edad: " << p.edad << '\n'
+                << "- ciudad: " << p.ciudad << '\n'
+                << "- detalles:\n";
+
+            for (const Contacto& c : p.detalles.contactos) {
+                cout << "--contacto:\n"
+                    << "----email: " << c.email << '\n'
+                    << "----telefono: " << c.telefono << '\n';
+            }
+            for (const Empleo& e : p.detalles.empleos) {
+                cout << "--Empleos:\n"
+                    << "----empresa: " << e.empresa << '\n'
+                    << "----puesto: " << e.puesto << '\n';
+            }
+            cout << '\n';
+        }
+
+    } catch (const runtime_error& e) {
+        cout << "Error: " << e.what() << endl;
+
+    }
+
+    return 0;
+}
+
