@@ -1,8 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <string>
+#include <fstream>
 
 using namespace std;
+
+int n = 31; // cantidad de repeticiones
 
 string criba(int _limite){
   auto init_time = chrono::high_resolution_clock::now();
@@ -18,16 +22,74 @@ string criba(int _limite){
   }
   auto end_time = chrono::high_resolution_clock::now();
   chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
-  return to_string(tiempo_ejecucion.count());
+  return std::to_string(tiempo_ejecucion.count());
 }
-string secuencia(int _limite);
-string tomar_tiempoRecursivo(int _limite);
+string secuencia(int _limite) {
+  auto init_time = chrono::high_resolution_clock::now();
+  int limite = _limite;
+
+  vector<int> primos;
+  for (int numero = 2; numero <= limite; numero++) {
+    bool es_primo = true;
+    for (int divisor = 2; divisor < numero; divisor++) {
+      if (numero % divisor == 0) {
+        es_primo = false;
+        break;
+      }
+    }
+    if (es_primo) {
+      primos.push_back(numero);
+    }
+  }
+
+  auto end_time = chrono::high_resolution_clock::now();
+  chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
+  return std::to_string(tiempo_ejecucion.count());
+}
+string recursivo(int _limite) {
+  auto init_time = chrono::high_resolution_clock::now();
+  int limite = _limite;
+
+
+  auto end_time = chrono::high_resolution_clock::now();
+  chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
+  return std::to_string(tiempo_ejecucion.count());
+}
 
 int main(){
-  for (int i= 0; i <= 31; i++){
-    cout << criba(100) << ",";
+  vector<int> vec_limites = {500, 5000, 50000};
+  ofstream archivo_csv("NumerosPrimosResultados.csv");
+
+  archivo_csv << "Metodo,Limite";
+  for (int repeticion = 1; repeticion <= n; repeticion++) {
+    archivo_csv << ",R" << repeticion;
   }
-  cout << endl;
+  archivo_csv << endl;
+
+  for (int limite : vec_limites) {
+    archivo_csv << "Criba," << limite;
+    for (int repeticion = 0; repeticion < n; repeticion++) {
+      archivo_csv << "," << criba(limite);
+      cout << "Criba " << limite << " R" << repeticion + 1 << " completada\n";
+    }
+    archivo_csv << endl;
+
+    archivo_csv << "Secuencial," << limite;
+    for (int repeticion = 0; repeticion < n; repeticion++) {
+      archivo_csv << "," << secuencia(limite);
+      cout << "Secuencial " << limite << " R" << repeticion + 1 << " completada\n";
+    }
+    archivo_csv << endl;
+/*
+    archivo_csv << "Recursivo," << limite;
+    for (int repeticion = 0; repeticion < n; repeticion++) {
+      archivo_csv << "," << recursivo(limite);
+      cout << "Recursivo " << limite << " R" << repeticion + 1 << " completada\n";
+    }
+    archivo_csv << endl;
+*/
+
+  }
 
   return 0;
 }
