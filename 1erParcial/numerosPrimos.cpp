@@ -43,21 +43,18 @@ string secuencia(int _limite) {
   try
   {
     for (int numero = 2; numero <= limite; numero++) { // solo probar con los primos
-        bool es_primo = true;
+      bool es_primo = true;
 
-        for (int primo : primos) {
-            if (primo * primo > numero)
-                break;
+      for (int primo : primos) {
+        if (primo * primo > numero) break;
 
-            if (numero % primo == 0) {
-                es_primo = false;
-                break;
-            }
-        }
+          if (numero % primo == 0) {
+            es_primo = false;
+            break;
+          }
+      }
 
-        if (es_primo) {
-            primos.push_back(numero);
-        }
+      if (es_primo) primos.push_back(numero);
     }
   }
   catch(const std::exception& e)
