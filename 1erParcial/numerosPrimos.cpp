@@ -143,6 +143,7 @@ int main(){
     }
     archivo_csv << endl;
   }
+   archivo_csv.close();
 
   return 0;
 }
