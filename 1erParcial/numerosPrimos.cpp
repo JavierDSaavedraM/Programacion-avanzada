@@ -14,12 +14,22 @@ string criba(int _limite){
   vector<bool> es_primo(limite+1,true);
   es_primo[0] = false;
   es_primo[1] = false;
-  for (int i = 2; i*i <= limite; i++){
-    if (es_primo[i]){
-      for(int j=i*i; j<=limite; j+=i)
-        es_primo[j] = false;
+  
+  try
+  {
+    for (int i = 2; i*i <= limite; i++){
+      if (es_primo[i]){
+        for(int j=i*i; j<=limite; j+=i)
+          es_primo[j] = false;
+      }
     }
   }
+  catch(const std::exception& e)
+  {
+    cerr << "Error en criba(" << _limite << "): " << e.what() << endl;
+    return "ERROR";
+  }
+  
   auto end_time = chrono::high_resolution_clock::now();
   chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
   return std::to_string(tiempo_ejecucion.count());
@@ -29,35 +39,70 @@ string secuencia(int _limite) {
   int limite = _limite;
 
   vector<int> primos;
-  for (int numero = 2; numero <= limite; numero++) {
-    bool es_primo = true;
-    for (int divisor = 2; divisor < numero; divisor++) {
-      if (numero % divisor == 0) {
-        es_primo = false;
-        break;
+
+  try
+  {
+    for (int numero = 2; numero <= limite; numero++) {
+      bool es_primo = true;
+      for (int divisor = 2; divisor < numero; divisor++) {
+        if (numero % divisor == 0) {
+          es_primo = false;
+          break;
+        }
+      }
+      if (es_primo) {
+        primos.push_back(numero);
       }
     }
-    if (es_primo) {
-      primos.push_back(numero);
-    }
+  }
+  catch(const std::exception& e)
+  {
+    cerr << "Error en secuencial(" << _limite << "): " << e.what() << endl;
+    return "ERROR";
   }
 
   auto end_time = chrono::high_resolution_clock::now();
   chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
   return std::to_string(tiempo_ejecucion.count());
 }
+
+bool recursivoProceso(int& revisar,int divisor){
+  if (divisor * divisor > revisar){
+    return true;
+  }
+  if (revisar % divisor == 0) {
+    return false;
+  }
+  return recursivoProceso(revisar,divisor+1);
+}
+
+
 string recursivo(int _limite) {
   auto init_time = chrono::high_resolution_clock::now();
-  int limite = _limite;
+  vector<int> primos;
 
-
+  try {
+    for (int i = 2; i <= _limite; i++) {
+      if (recursivoProceso(i,2)) {
+        primos.push_back(i);
+      }
+    }
+  }
+  catch(const std::exception& e)
+  {
+    cerr << "Error en recursivo(" << _limite << "): " << e.what() << endl;
+    return "ERROR";
+  }
+    
   auto end_time = chrono::high_resolution_clock::now();
   chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
+  //cout << primos.size() << endl;
   return std::to_string(tiempo_ejecucion.count());
 }
 
+
 int main(){
-  vector<int> vec_limites = {500, 5000, 50000};
+  vector<int> vec_limites = {50, 500, 5000, 50000,500000,5000000};
   ofstream archivo_csv("NumerosPrimosResultados.csv");
 
   archivo_csv << "Metodo,Limite";
@@ -80,15 +125,13 @@ int main(){
       cout << "Secuencial " << limite << " R" << repeticion + 1 << " completada\n";
     }
     archivo_csv << endl;
-/*
+
     archivo_csv << "Recursivo," << limite;
     for (int repeticion = 0; repeticion < n; repeticion++) {
       archivo_csv << "," << recursivo(limite);
       cout << "Recursivo " << limite << " R" << repeticion + 1 << " completada\n";
     }
     archivo_csv << endl;
-*/
-
   }
 
   return 0;
