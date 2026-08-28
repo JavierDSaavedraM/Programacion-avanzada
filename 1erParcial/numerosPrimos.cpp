@@ -20,12 +20,11 @@ int n = 31; // cantidad de repeticiones
 string criba(int _limite){
   auto init_time = chrono::high_resolution_clock::now();
   int limite = _limite;
-  vector<bool> es_primo(limite+1,true);
-  es_primo[0] = false;
-  es_primo[1] = false;
-  
   try
   {
+    vector<bool> es_primo(limite+1,true);
+    es_primo[0] = false;
+    es_primo[1] = false;
     for (int i = 2; i*i <= limite; i++){
       if (es_primo[i]){
         for(int j=i*i; j<=limite; j+=i)
