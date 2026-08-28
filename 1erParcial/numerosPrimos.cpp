@@ -1,3 +1,12 @@
+/*
+Nombres:
+Sergio Alejandro Zamora Dávila 616148
+Javier Djorkaef Saavedra Mendiola 624198
+Roberto De la Fuente 593303
+
+Damos nuestra palabra que hemos realizado esta actividad con integridad académica
+*/
+
 #include <iostream>
 #include <vector>
 #include <chrono>
