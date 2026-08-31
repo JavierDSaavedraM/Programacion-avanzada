@@ -15,47 +15,54 @@ Damos nuestra palabra que hemos realizado esta actividad con integridad académi
 
 using namespace std;
 
-int maxVerificado = 1;
-vector<int> primos;
+vector<int> primos = {2}; 
+int maxCalculado = 2; 
 
-bool esPrimo(int numero) {
-    // Si el numero a verificar es menor al maximo verificado,
-    // solo buscar entre los primos conocidos.
-    if (numero <= maxVerificado) {
-        for (int primo : primos) {
-            if (primo > numero / primo)
-                break;
+// Expandir la lista de primos hasta el nuevo limite
+void expandirPrimos(int limite) {
+    if (limite <= maxCalculado) return;
 
-            if (numero % primo == 0)
-                return false;
-        }
+    // Se empieza desde el siguiente numero
+    int inicio = maxCalculado + 1;
+    if (inicio % 2 == 0) inicio + 1; // saltar uno si es par
 
-        return true;
-    }
-
-    // Si el numero a verificar es mayor al maximo verificado,
-    // entonces avanzar progresivamente hasta el numero.
-    for (int candidato = maxVerificado + 1; candidato <= numero; ++candidato) {
-        bool primo = true;
-
+    for (int candidato = inicio; candidato <= limite; candidato += 2) { // Solo ver impares (impar + 2 = impar)
+        bool es_primo = true;
+        
         for (int divisor : primos) {
-            if (divisor > candidato / divisor)
-                break;
-
+            if (divisor * divisor > candidato) break;
             if (candidato % divisor == 0) {
-                primo = false;
+                es_primo = false;
                 break;
             }
         }
-
-        if (primo)
+        
+        if (es_primo) {
             primos.push_back(candidato);
+        }
+    }
+    maxCalculado = limite;
+}
 
-        maxVerificado = candidato;
+bool esPrimo(int numero) {
+    // Descartes rapidos
+    if (numero <= 1) return false;
+    if (numero == 2) return true;
+    if (numero % 2 == 0) return false; 
+
+    int raiz = sqrt(numero);
+    
+    if (raiz > maxCalculado) {
+        expandirPrimos(raiz);
     }
 
-    // Si el ultimo primo agregado es el numero buscado, entonces sí es primo
-    return !primos.empty() && primos.back() == numero;
+    // Verificar el numero
+    for (int primo : primos) {
+        if (primo * primo > numero) break;
+        if (numero % primo == 0) return false;
+    }
+
+    return true;
 }
 
 bool esPalindromo(int _i){
