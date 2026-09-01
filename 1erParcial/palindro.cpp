@@ -7,11 +7,14 @@ Roberto De la Fuente 593303
 Damos nuestra palabra que hemos realizado esta actividad con integridad académica
 */
 
+#include <cstddef>
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
@@ -24,7 +27,7 @@ void expandirPrimos(int limite) {
 
     // Se empieza desde el siguiente numero
     int inicio = maxCalculado + 1;
-    if (inicio % 2 == 0) inicio + 1; // saltar uno si es par
+    if (inicio % 2 == 0) inicio += 1; // saltar uno si es par
 
     for (int candidato = inicio; candidato <= limite; candidato += 2) { // Solo ver impares (impar + 2 = impar)
         bool es_primo = true;
@@ -72,32 +75,87 @@ bool esPalindromo(int _i){
     return palindromo == original;
 }
 
-
-int main(){
-    int num = 100030000;
-    string numero = to_string(num);
-    int tamanio = numero.length();
+int obtenerNumeroPrimoPalindromo(int _i){
+    int limite_inicial = _i;
+    string limite_str = to_string(limite_inicial);
+    int tamanio = limite_str.length();
     if (tamanio % 2 == 0) { tamanio++; }
-    int revisar = pow(10,tamanio)/10;
+    int numero_actual = pow(10,tamanio)/10;
     while (true) {
-        if (revisar < num){
-            revisar = num +1;
+        if (numero_actual < limite_inicial){
+            numero_actual = limite_inicial +1;
         }
-        numero = to_string(revisar);
-        tamanio = numero.length();
+        limite_str = to_string(numero_actual);
+        tamanio = limite_str.length();
         if (tamanio % 2 ==0) {
             tamanio++;
-            revisar = pow(10,tamanio)/10;
+            numero_actual = pow(10,tamanio)/10;
         }
         else{
-            if (esPalindromo(revisar)){
-                if (esPrimo(revisar)) { break;}
+            if (esPalindromo(numero_actual)){
+                if (esPrimo(numero_actual)) { break;}
             }
-            revisar++;
+            numero_actual++;
         }
     }
+    return numero_actual;
+}
 
-    cout << "El siguiente numero palindromo que es primo es: " << revisar << endl;
-    
+string obtenerTiempoDeEjecucion(int _i){
+    auto init_time = chrono::high_resolution_clock::now();
+    primos = {2}; 
+    maxCalculado = 2; 
+    obtenerNumeroPrimoPalindromo(_i);
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
+  return std::to_string(tiempo_ejecucion.count());
+};
+
+void escribirArchivoCSV(vector<int> & _inputs){
+    const int num_repeticiones = 31;
+    vector<vector<string>> resultados(_inputs.size(), vector<string>(num_repeticiones));
+
+    // Obtener todas las iteraciones por el input
+    for (size_t i = 0; i < _inputs.size();i++){
+        for (size_t j = 0; j < num_repeticiones; ++j){
+            resultados[i][j] = obtenerTiempoDeEjecucion(_inputs[i]);
+        }
+    } 
+
+    ofstream  archivo_csv("numerosPrimosPalindromos.csv");
+
+    if(!archivo_csv.is_open()){
+        throw runtime_error("No se pudo abrir el archivo");
+    }
+    string linea;
+
+    // Imprimir header
+    for(size_t i = 0; i<_inputs.size(); i++){
+        linea += to_string(_inputs[i]);
+        if(i+1 < _inputs.size())
+            linea += ",";
+    }
+    archivo_csv << linea << endl;
+
+    // Guardar verticalmente
+    for (size_t i = 0; i< num_repeticiones; i++){
+        linea = "";
+        for (int j = 0; j < _inputs.size(); j++){
+            linea += resultados[j][i];
+            if (j + 1 < _inputs.size())
+                linea += ",";
+        }
+        archivo_csv << linea << endl;
+    }
+    archivo_csv.close();
+}
+
+int main(){
+    try{
+        vector<int> input = {6,8,13,99899,10000000,100030000};
+        escribirArchivoCSV(input);
+    } catch (const runtime_error& e) {
+        cout << "Error: " << e.what() << endl;
+    }
     return 0;
 }
