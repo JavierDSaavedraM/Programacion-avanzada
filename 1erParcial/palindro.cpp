@@ -79,6 +79,7 @@ int obtenerNumeroPrimoPalindromo(int _i){
     int limite_inicial = _i;
     string limite_str = to_string(limite_inicial);
     int tamanio = limite_str.length();
+    if(_i <= 11 && _i > 7){ return 11; }
     if (tamanio % 2 == 0) { tamanio++; }
     int numero_actual = pow(10,tamanio)/10;
     while (true) {
@@ -153,7 +154,17 @@ void escribirArchivoCSV(vector<int> & _inputs){
 int main(){
     try{
         vector<int> input = {6,8,13,99899,10000000,100030000};
-        escribirArchivoCSV(input);
+        //escribirArchivoCSV(input);
+        for (const int &num: input){
+            cout << "Para el numero: "<< num << " "<< obtenerNumeroPrimoPalindromo(num) << endl;
+        }
+
+        cout << "Para el numero: 7 "<< obtenerNumeroPrimoPalindromo(8) << endl;
+        cout << "Para el numero: 8 "<< obtenerNumeroPrimoPalindromo(8) << endl;
+        cout << "Para el numero: 9 "<< obtenerNumeroPrimoPalindromo(9) << endl;
+        cout << "Para el numero: 10 "<< obtenerNumeroPrimoPalindromo(10) << endl;
+        cout << "Para el numero: 11 "<< obtenerNumeroPrimoPalindromo(11) << endl;
+
     } catch (const runtime_error& e) {
         cout << "Error: " << e.what() << endl;
     }
