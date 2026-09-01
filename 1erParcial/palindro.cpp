@@ -83,7 +83,7 @@ int obtenerNumeroPrimoPalindromo(int _i){
     int numero_actual = pow(10,tamanio)/10;
     while (true) {
         if (numero_actual < limite_inicial){
-            numero_actual = limite_inicial +1;
+            numero_actual = limite_inicial;
         }
         limite_str = to_string(numero_actual);
         tamanio = limite_str.length();
