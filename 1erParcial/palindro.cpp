@@ -158,13 +158,6 @@ int main(){
         for (const int &num: input){
             cout << "Para el numero: "<< num << " "<< obtenerNumeroPrimoPalindromo(num) << endl;
         }
-
-        cout << "Para el numero: 7 "<< obtenerNumeroPrimoPalindromo(8) << endl;
-        cout << "Para el numero: 8 "<< obtenerNumeroPrimoPalindromo(8) << endl;
-        cout << "Para el numero: 9 "<< obtenerNumeroPrimoPalindromo(9) << endl;
-        cout << "Para el numero: 10 "<< obtenerNumeroPrimoPalindromo(10) << endl;
-        cout << "Para el numero: 11 "<< obtenerNumeroPrimoPalindromo(11) << endl;
-
     } catch (const runtime_error& e) {
         cout << "Error: " << e.what() << endl;
     }
