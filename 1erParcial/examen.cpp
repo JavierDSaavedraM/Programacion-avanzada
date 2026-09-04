@@ -67,17 +67,22 @@ int juego(string tablero,string mano){
 
 void calculo(string &tablero){
     char color = tablero[0];
-    int contador = 0;
+    int contador = 1;
     for (int i = 1; i < tablero.size(); i++) {
         char act = tablero[i];
         if (act == color){
             contador++;
         } else {
-            if (contador > 2){
-                for (int j = 0; j < contador; j++) {
-                    tablero.erase(tablero.begin()+i);
-                }
+            if (contador >= 3) {
+                tablero.erase(i-contador, contador);
+                i = 0;
+                act=tablero[0];
             }
+            contador=1;
+            color = act;
+        }   
+        if (i==tablero.size()-1 and contador >= 3) {
+            tablero.erase(i-contador+1,contador);
         }
     }
 }
@@ -85,7 +90,7 @@ void calculo(string &tablero){
 
 
 int main(){
-    vector<string> tableros{"rr","rrrg","rbb","wwrrbbww","bbyyrrbb","bbwwrrwwbb","wgrrbbyyw","rybwg","rrwwbbyyggrr","rrwybwrr"};  
+    vector<string> tableros{"rr","gggrrr","rbb","wwrrbbww","bbyyrrbb","bbwwrrwwbb","wgrrbbyyw","rybwg","rrwwbbyyggrr","rrwybwrr"};  
     vector<string> manos{"r","rrgg","rrbb","wrbrw","byr","wrb","wbgry","rryybbwwgg","gybwgybw","wwyybbw"}; 
     
     /*
@@ -99,7 +104,7 @@ int main(){
         
     }*/
     calculo(tableros[1]);
-    cout << tableros[1] << endl;
+    cout << "Return: " << tableros[1] << endl;
     
     return 0;
 }
