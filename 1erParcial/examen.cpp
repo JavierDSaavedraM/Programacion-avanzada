@@ -56,16 +56,16 @@ string eliminar_combo(string _tablero){
     return tablero;
 }
 
-vector<size_t> obtenerPosValidas(string _t, string _c){
+vector<size_t> obtenerPosValidas(string _t, char _c){
     string tablero_actual = _t;
-    string color_actual = _c;
+    char color_actual = _c;
 
     vector<size_t> pos_validas;
     unordered_set<string> valores_anteriores;
 
     for (size_t pos = 0; pos <= tablero_actual.size(); pos++){
         string nuevo_tablero = tablero_actual;
-        nuevo_tablero.insert(pos, color_actual);
+        nuevo_tablero.insert(pos,1,color_actual);
 
         if(valores_anteriores.find(nuevo_tablero) == valores_anteriores.end()){
             valores_anteriores.insert(nuevo_tablero);
@@ -93,16 +93,14 @@ int resolver(string _t, string _m){
     }
     int mejor_mano = -1;
     for (size_t color = 0 ; color < mano.size() ; color++){
-        string color_actual;
-        color_actual.push_back(mano[color]);
         if(color > 0 && mano[color] == mano[color-1]){
             continue;
         }
-        vector<size_t> pos_validas = obtenerPosValidas(tablero, color_actual);
+        vector<size_t> pos_validas = obtenerPosValidas(tablero, mano[color]);
         for (size_t espacio_tablero = 0; espacio_tablero < pos_validas.size(); espacio_tablero++){
             string nuevo_tablero = tablero;
             string nueva_mano = mano;
-            nuevo_tablero.insert(pos_validas[espacio_tablero], color_actual);
+            nuevo_tablero.insert(pos_validas[espacio_tablero],1, mano[color]);
             nuevo_tablero = eliminar_combo(nuevo_tablero);
             nueva_mano.erase(color, 1);
             int resultado_hojas = resolver(nuevo_tablero, nueva_mano);
