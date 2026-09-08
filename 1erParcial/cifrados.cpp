@@ -20,6 +20,17 @@ string cifrar_cesar(string _s, int _k){
     return nueva_frase;
 }
 
+string decifrar_cesar(string _s, int _k){
+    string nueva_frase;
+    int valor_circular = ALPHABETO.size();
+    for(const auto& letra: _s){
+        int pos = ALPHABETO.find(letra);
+        int shift =  (pos - _k + valor_circular)%valor_circular;
+        nueva_frase += (pos == -1) ? letra: ALPHABETO[shift];
+    }
+    return nueva_frase;
+}
+
 // Funcion cifrado cesar que mueve la pos #define 
 // @input: tienes una frase (_s) y una llave (_k) que dependiendo de las palabras que contenga puede shiftear la pos del alfabeto.
 // @output: frase crifrada con 
@@ -57,9 +68,22 @@ string cifrar_vigenere(string _s, string _k){
     return nueva_frase;
 }
 
+string decifrar_vigenere(string _s, string _k){
+    stack<pair<int, char>> invalid = eliminar_caracteres_invalidos(_s);
+    string nueva_frase;
+    int valor_circular_llave = _k.size();
+    for (int i= 0; i < _s.size(); i++){
+        int pos_shift = ALPHABETO.find(_k[i % valor_circular_llave]);
+        nueva_frase += decifrar_cesar(string(1,_s[i]), pos_shift);
+    }
+    regresar_caracters_invalidos(invalid, nueva_frase);
+    return nueva_frase;
+}
+
 int main(){
 
-    cout << cifrar_cesar("Kasane Teto",14) << endl;
-    cout << cifrar_vigenere("attacking tonight", "oculorhinolaryngology") << endl;
+    cout << cifrar_vigenere("the quick brown", "cryptii") << endl;
+    cout << decifrar_vigenere("vyc fnqkm spdpv","cryptii") << endl;
+
     return 0;
 }
