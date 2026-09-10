@@ -32,7 +32,6 @@ using namespace std;
 // @output: Envia una version del tablero modificado o no.
 string eliminar_combo(string _tablero){
     string tablero = _tablero;
-    bool cambio = false;
     if (tablero.empty()) return "";
     char color = tablero[0];
     int contador = 1;
@@ -45,14 +44,12 @@ string eliminar_combo(string _tablero){
                 tablero.erase(i-contador, contador);
                 i = 0;
                 act=tablero[0];
-                cambio = true;
             }
             contador=1;
             color = act;
         }   
         if (i==tablero.size()-1 and contador > 2) {
             tablero.erase(i-contador+1,contador);
-            cambio = true;
         }
     }
     return tablero;
@@ -123,10 +120,9 @@ int resolver(string _t, string _m){
     return mejor_mano;
 }
 
-
 string obtenerTiempoDeEjecucion(string _b, string _h){
-    auto init_time = chrono::high_resolution_clock::now();
     estados_visitados = {};
+    auto init_time = chrono::high_resolution_clock::now();
     resolver(_b,_h);
     auto end_time = chrono::high_resolution_clock::now();
     chrono::duration<double, milli> tiempo_ejecucion = end_time - init_time;
@@ -177,15 +173,14 @@ int main(){
     try{
         vector<string> tableros{"rr","rg","rbb","wwrrbbww","bbyyrrbb","bbwwrrwwbb","wgrrbbyyw","rybwg","rrwwbbyyggrr","rrwybwrr"};  
         vector<string> manos{"r","rrgg","rrbb","wrbrw","byr","wrb","wbgry","rryybbwwgg","gybwgybw","wwyybbw"};     
-        escribirArchivoCSV(tableros, manos);
-        /*
+  //      escribirArchivoCSV(tableros, manos);
         for(size_t i= 0; i < tableros.size(); i++){
-            string board = tableros.at(i);
-            string hand = manos.at(i);
+            string board = tableros[i];
+            string hand = manos[i];
+            estados_visitados = {};
             cout << board << "/"<< hand << " " << 
                 resolver(board, hand) << endl;
         }
-        */
 
     } catch (const runtime_error& e) {
         cout << "Error: " << e.what() << endl;
