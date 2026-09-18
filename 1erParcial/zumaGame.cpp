@@ -48,7 +48,7 @@ string eliminar_combo(string _tablero){
             contador=1;
             color = act;
         }   
-        if (i==tablero.size()-1 and contador > 2) {
+        if (i==tablero.size()-1 && contador > 2) {
             tablero.erase(i-contador+1,contador);
         }
     }
