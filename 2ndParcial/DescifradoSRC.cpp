@@ -25,7 +25,7 @@ using namespace std;
 #define LOG_DEBUG(msg)
 #endif
 
-// Constante que tiene todos los caracteres validos para el cifrado
+// Constante que tiene todos los caracteres validos para el cifrado, esto nos ayuda en el codigo para poder saber qué letra es cada número
 const string ALPHABETO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 // Suma las posiciones de las letras para obtener la rotacion del mensaje.
@@ -37,7 +37,7 @@ int calcularRotacion(string mensaje) {
     return valor;
 }
 
-// Combina dos partes al sumar la posicion de sus letras.
+// Combina las dos partes al sumar la posicion de sus letras.
 string combinar(string pt1, string pt2){
     for (int i = 0; i < pt1.size(); i++) {
         int nuevo = ALPHABETO.find(pt1[i]) + ALPHABETO.find(pt2[i]); 
@@ -62,7 +62,7 @@ string rotarMensaje(string mensaje, int rotacion){
     return mensaje;
 }
 
-// Divide el mensaje, rota ambas partes y luego las combina para descifrarlo.
+// Divide el mensaje en 2, rota ambas partes y luego las combina para descifrarlo.
 string descifrar(string mensaje){
     int largo = mensaje.length();
 
@@ -83,11 +83,11 @@ int main(){
     try {
         int casos; 
         string mensaje;
-        cout << "Cantidad de casos: ";
+        cout << "Cantidad de casos: " << endl;
         cin >> casos;
 
         if (casos <= 0) { // Debe de ver algun mensaje
-            cout << "Nada? Okay bye";
+            cout << "Nada? Okay, bye";
             return 0;
         }
 
