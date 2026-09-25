@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <iostream>
-#include <stdexcept>
 #include <unordered_map>
 #include <string>
 #include <stack>
