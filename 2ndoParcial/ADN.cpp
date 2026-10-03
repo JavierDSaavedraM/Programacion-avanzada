@@ -12,14 +12,14 @@ Roberto De la Fuente 593303
 
 using namespace std;
 
-class TablaHash{
+class TablaHash{ // Utilizamos como base el codigo visto en clase para armar nuestra propia estructura de tabla hash
 private:
-  int capacidad;
-  vector<list<pair<string,int>>> TABLA;
-  int generadorHash(const string valor){
-    int clave = 0;
+  int capacidad; // Es la cantidad de datos que la tabla hash va a tener 
+  vector<list<pair<string,int>>> TABLA; // Declaramos la tabla hash 
+  int generadorHash(const string valor){ // Creamos nuestro propio generador de clave 
+    int clave = 1;
     for(int i=0; i < valor.length(); i++){
-      clave = clave * 31 * valor[i];
+      clave = clave * 31 * valor[i]; // Hacemos esto 
     }
     return clave;
   }
@@ -60,10 +60,26 @@ public:
       }
     }
   }
+
+  void imprimir(){
+    bool primero = true;
+    cout << "Resultado del problema: " << endl << "[";
+    for (int i = 0; i < TABLA.size(); i++) {
+      for (auto& par : TABLA[i]) {
+        if (par.second > 0) {
+          if (primero == false) {
+            cout << ", ";
+          }
+          cout << '"' << par.first << '"';
+          primero = false;
+        }
+      }
+    }
+    cout << "]"<<endl;
+  }
 };
 
 
-vector<string> prueba;
 void obtenerCombinaciones(const string& secuencia) {
   TablaHash MiTabla(secuencia.size()-10);
   for (int i = 9; i < secuencia.size(); i++) {
@@ -74,37 +90,17 @@ void obtenerCombinaciones(const string& secuencia) {
     } else {
       MiTabla.sumar(nuevo);
     }
-    prueba.push_back(nuevo);
   }
+  MiTabla.imprimir();
 }
 
 int main(){
-  vector<string> secuencias = {"AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT","AAAAAAAAAAAAA"};
-/*
+  //vector<string> secuencias = {"AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT","AAAAAAAAAAAAA"};
+  //obtenerCombinaciones(secuencias[0]);
+  //obtenerCombinaciones(secuencias[1]);
   string secuencia;
   cout << "Dame la secuencia: ";
   cin >> secuencia;
-*/
-
-
-  obtenerCombinaciones(secuencias[0]);
-
-  for (size_t i = 0; i < prueba.size(); i++) {
-    cout << prueba[i] << endl;
-  }
-  
-
-
-
-  /*
-
-  TablaHash MiTabla(5);
-  MiTabla.put("usuario1","ana");
-  MiTabla.put("usuario2","pedro");
-  MiTabla.put("usuario3","carlos");
-  MiTabla.put("NegritoOjoClaro","Ozuna");
-  MiTabla.put("Luffy","Rey de los piratas");
-
-  cout << "Buscar: usuario2" << MiTabla.get("usuario2") << endl;*/
+  obtenerCombinaciones(secuencia);
   return 0;
 }
