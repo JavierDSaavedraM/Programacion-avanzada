@@ -55,9 +55,32 @@ int main() {
         */
 
         string caso;
-        vector<int> caso_sep;
-        cout << "Dame la lista de numeros: ";
-        cin >> caso;
+        cout << "Dame la lista de numeros: " << endl;
+        getline(cin, caso);
+
+        string numero; // para separar el numero del string
+        vector<int> caso_vec;
+        for (int i = 0; i < caso.size(); i++) {
+            char c = caso[i];
+            if (isdigit(c)) {
+                numero += c;
+            } else { // Termina un número encontrado
+                if (!numero.empty()) { // Evita mandar numeros vacios.
+                    caso_vec.push_back(stoi(numero));
+                    numero.clear();
+                }
+            }
+        }
+
+        if (!numero.empty()) { // Por si el último número no termino antes del final de la cadena
+            caso_vec.push_back(stoi(numero));
+        }
+
+        int res = resolver(caso_vec, 0, 0);
+        
+        cout << "Entrada: ";
+        for (int i: caso_vec) cout << i << ' ';
+        cout << endl << "Salida: " << res << endl;
 
     } catch (const exception& error) { // Muestra el motivo del error sin terminar el programa de forma inesperada.
         cerr << "Error: " << error.what() << endl;
