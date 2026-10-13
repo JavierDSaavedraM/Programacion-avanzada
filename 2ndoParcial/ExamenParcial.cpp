@@ -16,9 +16,8 @@ struct Nodo {
     Nodo* derecho;
 
     // Constructor
-    Nodo(int val, int ID) {
+    Nodo(int val) {
         dato = val;
-        id = ID;
         izquierdo = nullptr;
         derecho = nullptr;
     }
@@ -36,7 +35,7 @@ public:
         if (indice >= arbolito.size() or arbolito[indice] == "null"){
             return nullptr;
         }
-        Nodo* nodo = new Nodo(stoi(arbolito[indice]),indice); 
+        Nodo* nodo = new Nodo(stoi(arbolito[indice])); 
         nodo->izquierdo= crearArbol(arbolito,2*indice+1);
         nodo->derecho= crearArbol(arbolito,2*indice+2);
         return nodo;
