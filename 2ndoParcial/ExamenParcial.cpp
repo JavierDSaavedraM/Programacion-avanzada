@@ -11,14 +11,14 @@ using namespace std;
 
 // Definición de la estructura del nodo
 struct Nodo {
-    int dato, id;
+    int dato,id;
     Nodo* izquierdo;
     Nodo* derecho;
 
     // Constructor
-    Nodo(int val,int ID) {
-        id = ID;
+    Nodo(int val, int ID) {
         dato = val;
+        id = ID;
         izquierdo = nullptr;
         derecho = nullptr;
     }
@@ -32,64 +32,34 @@ public:
         raiz = nullptr;
     }
 
-    // Función para buscar un nodo por su valor (para saber dónde insertar)
-    Nodo* buscar(Nodo* actual, int idBuscado) {
-        if (actual == nullptr) return nullptr;
-        if (actual->id == idBuscado) return actual;
-
-        Nodo* encontrado = buscar(actual->izquierdo, idBuscado);
-        if (encontrado != nullptr) return encontrado;
-
-        return buscar(actual->derecho, idBuscado);
+    Nodo* crearArbol(const vector<string>& arbolito, int indice) {
+        if (indice >= arbolito.size() or arbolito[indice] == "null"){
+            return nullptr;
+        }
+        Nodo* nodo = new Nodo(stoi(arbolito[indice]),indice); 
+        nodo->izquierdo= crearArbol(arbolito,2*indice+1);
+        nodo->derecho= crearArbol(arbolito,2*indice+2);
+        return nodo;
     }
 
-    // Función para insertar un hijo especificando el padre y el lado ('I' para izquierdo, 'D' para derecho)
-    bool insertarHijo(int idPadre, int idHijo, int valorNuevoHijo, char lado) {
-        // Si el árbol está vacío, se crea como raíz
+    void inorderRecursivo(Nodo* raiz) {
         if (raiz == nullptr) {
-            raiz = new Nodo(valorNuevoHijo, idHijo);
-            return true;
+            return;
         }
-
-        // Buscar el nodo padre
-        Nodo* padre = buscar(raiz, idPadre);
-        if (padre == nullptr) {
-            cout << "No se encontró el nodo padre con valor: " << idPadre << endl;
-            return false;
-        }
-
-        // Insertar según el lado especificado
-        if (lado == 'I' || lado == 'i') {
-            if (padre->izquierdo == nullptr) {
-                padre->izquierdo = new Nodo(valorNuevoHijo, idHijo);
-                return true;
-            } else {
-                cout << "El nodo padre ya tiene un hijo izquierdo." << endl;
-                return false;
-            }
-        } else if (lado == 'D' || lado == 'd') {
-            if (padre->derecho == nullptr) {
-                padre->derecho = new Nodo(valorNuevoHijo,idHijo);
-                return true;
-            } else {
-                cout << "El nodo padre ya tiene un hijo derecho." << endl;
-                return false;
-            }
-        }
-
-        return false;
+        inorderRecursivo(raiz->izquierdo); // 1. Izquierda
+        cout << raiz->dato << " ";    // 2. Raíz (Procesar)
+        inorderRecursivo(raiz->derecho);   // 3. Derecha
     }
+
 };
 
 void crearArbol(vector<string>&arbolito){
     ArbolBinario AB;
-    AB.insertarHijo(0,0,stoi(arbolito[0]),'i');
-    for (int i = 0; i < arbolito.size(); i++){
-        AB.insertarHijo(0,i,stoi(arbolito[i]),'i');
-        i++;
-        AB.insertarHijo(0,i,stoi(arbolito[i]),'d');
-    }
+    AB.raiz = AB.crearArbol(arbolito,0);
+
+    AB.inorderRecursivo(AB.raiz);
 }
+
 
 int main(){
     // guardar la posicion de cada valor como si fuera su ID
