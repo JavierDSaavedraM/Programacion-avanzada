@@ -9,6 +9,9 @@ Roberto De la Fuente 593303
 #include <queue>
 #include <vector>
 #include <string>
+#include <utility>
+#include <string>
+#include <climits>
 using namespace std;
 
 // Definición de la estructura del nodo
@@ -54,56 +57,70 @@ public:
 
 };
 
-int calcularResultado(ArbolBinario AB,Nodo* raiz,int valor, int k,bool valido){
+int calcularResultado(ArbolBinario AB,Nodo* raiz,int valor, int k,bool valido,int casasRobadas){
     // izquierdo
-    int opt1 = valor; // no lo agarra
-    int opt2 = valor; // si lo agarra
+    int opt1 = 0; // no lo agarra
+    int opt2 = 0; // si lo agarra
     
     //derecho 
-    int opt3 = valor; // no lo agarra
-    int opt4 = valor; // si lo agarra
+    int opt3 = 0; // no lo agarra
+    int opt4 = 0; // si lo agarra
     // pregunto si es que agarro el actual o no
     
     // digamos que es que no agarro el nodo actual 
     if (raiz->izquierdo != nullptr) {
         // no lo añade 
-        opt1 = calcularResultado(AB,raiz->izquierdo,valor,k,true);
+        opt1 = opt1 + calcularResultado(AB,raiz->izquierdo,valor,k,true,casasRobadas);
         // si lo añade
         if (valido == true) {
-            opt2 = calcularResultado(AB,raiz->izquierdo,valor+raiz->dato,k-1,false);
-        }        
+            opt2 = opt2 + calcularResultado(AB,raiz->izquierdo,valor,k,false,casasRobadas+1);
+        }
     }
     if (raiz->derecho != nullptr) {
         // no lo añade 
-        opt3 = calcularResultado(AB,raiz->derecho,valor,k,true);
+        opt3 = opt3 + calcularResultado(AB,raiz->derecho,valor,k,true,casasRobadas);
         // si lo añade
         if (valido == true) {
-            opt4 = calcularResultado(AB,raiz->derecho,valor+raiz->dato,k-1,false);
+            opt4 = opt4 + calcularResultado(AB,raiz->derecho,valor,k,false,casasRobadas+1);
         }
     }
     if (raiz->derecho == nullptr and raiz->izquierdo == nullptr){
         if (valido){
-            k--;
-            if (k > 0) {
-                return 0;
+            casasRobadas++;
+            if (k > casasRobadas + 1) {
+                return INT_MIN;
             }
-            return valor + raiz->dato;
+            return raiz->dato;
         }
-        if (k > 0) {
-            return 0;
+        if (k > casasRobadas){
+            return INT_MIN;
         }
-        return valor;        
+        return 0;
     }
     
+    int noAgarro = INT_MIN;
+    if (opt1 != INT_MIN and opt3 != INT_MIN) {
+        noAgarro = opt1 + opt3;
+    }
     
-    if ((opt1 + opt3 - valor) > (opt2 + opt4 - raiz->dato - valor)) {
-        return (opt1 + opt3 - valor);
-    } else {return (opt2 + opt4 - raiz->dato - valor);}
+    if (valido == false) {
+        return noAgarro;
+    }
+
+    int agarro = INT_MIN;
+    if (opt2 != INT_MIN and opt4 != INT_MIN) {
+        agarro = raiz->dato + opt2 + opt4;
+    }
+    
+    if (noAgarro > agarro) {
+        return noAgarro;
+    } else {return agarro;}
+    
 }
 
 int calcularResultado(ArbolBinario AB,int k){
     Nodo* nodo = AB.raiz;
-    return calcularResultado(AB,nodo,0,k,true);
+    return calcularResultado(AB,nodo,0,k,true,0);
 }
 
 void crearArbol(vector<string>&arbolito,int k){
@@ -111,19 +128,22 @@ void crearArbol(vector<string>&arbolito,int k){
     AB.raiz = AB.crearArbol(arbolito,0);
 
     AB.inorderRecursivo(AB.raiz);
-    cout << endl <<calcularResultado(AB,k) << endl;
+
+
+    int resultado = calcularResultado(AB,k);
+    if (resultado > 0){
+        cout << "\n" <<resultado << endl;
+    } else {cout << "\nNo se puede resolver el problema" << endl;}
+    
+    
 }
 
 
 int main(){
-    // guardar la posicion de cada valor como si fuera su ID
-    vector<string> raiz = {"3","2","3","null","3","null","1"};
-    int k = 2;
-
-    vector<string> ej2 = {"3", "4", "5", "1", "3", "null", "1"};
-    int l = 4;
-    crearArbol(raiz,k);
-    crearArbol(ej2,l);
-    // (n+1)*2
+    vector<pair<vector<string>,int>> ejemplos = {{{"3","2","3","null","3","null","1"},2},{{"3", "4", "5", "1", "3", "null", "1"},4},{{"1","2","3"},2},{{"4","1","null","2","null","3"},3},{{"2","1","3","null","4"},2},{{"3","1","null","null","2"},2}};
+    for (int i = 0; i < ejemplos.size(); i++) {
+        cout << "Caso numero " << i+1 << endl;
+        crearArbol(ejemplos[i].first,ejemplos[i].second);
+    }
     return 0;
 }
