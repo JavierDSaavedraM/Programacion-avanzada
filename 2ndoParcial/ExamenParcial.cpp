@@ -16,7 +16,7 @@ using namespace std;
 
 // Definición de la estructura del nodo
 struct Nodo {
-    int dato,id;
+    int dato;
     Nodo* izquierdo;
     Nodo* derecho;
 
