@@ -6,12 +6,11 @@ Roberto De la Fuente 593303
 */
 
 #include <iostream>
+#include <algorithm>
 #include <queue>
 #include <vector>
 #include <string>
 #include <utility>
-#include <string>
-#include <climits>
 using namespace std;
 
 // Definición de la estructura del nodo
@@ -35,15 +34,35 @@ public:
     ArbolBinario() {
         raiz = nullptr;
     }
+    ~ArbolBinario(){
+        destruirArbol(raiz);
+    }
 
-    Nodo* crearArbol(const vector<string>& arbolito, int indice) {
-        if (indice >= arbolito.size() or arbolito[indice] == "null"){
-            return nullptr;
+    Nodo* crearArbol(const vector<string>& arbolito) {
+        if(arbolito.empty() || arbolito[0] == "null") return nullptr;
+        Nodo* raiz = new Nodo(stoi(arbolito[0]));
+        queue<Nodo *> q;
+        q.push(raiz);
+        int i =1;
+        while(!q.empty() && i < arbolito.size()){
+            Nodo* cur = q.front();
+            q.pop();
+            if(i < arbolito.size()){
+                if(arbolito[i] !="null"){
+                    cur->izquierdo = new Nodo(stoi(arbolito[i]));
+                    q.push(cur->izquierdo);
+                };
+                i++;
+            }
+            if(i < arbolito.size()){
+                if(arbolito[i] !="null"){
+                    cur->derecho = new Nodo(stoi(arbolito[i]));
+                    q.push(cur->derecho);
+                };
+                i++;
+            }
         }
-        Nodo* nodo = new Nodo(stoi(arbolito[indice])); 
-        nodo->izquierdo= crearArbol(arbolito,2*indice+1);
-        nodo->derecho= crearArbol(arbolito,2*indice+2);
-        return nodo;
+        return raiz;
     }
 
     void inorderRecursivo(Nodo* raiz) {
@@ -54,96 +73,121 @@ public:
         cout << raiz->dato << " ";    // 2. Raíz (Procesar)
         inorderRecursivo(raiz->derecho);   // 3. Derecha
     }
+private:
+    void destruirArbol(Nodo* nodo) {
+        if (nodo == nullptr) {
+            return;
+        }
 
+        destruirArbol(nodo->izquierdo);
+        destruirArbol(nodo->derecho);
+        delete nodo;
+    }
 };
 
-int calcularResultado(ArbolBinario AB,Nodo* raiz,int valor, int k,bool valido,int casasRobadas){
-    // izquierdo
-    int opt1 = 0; // no lo agarra
-    int opt2 = 0; // si lo agarra
-    
-    //derecho 
-    int opt3 = 0; // no lo agarra
-    int opt4 = 0; // si lo agarra
-    // pregunto si es que agarro el actual o no
-    
-    // digamos que es que no agarro el nodo actual 
-    if (raiz->izquierdo != nullptr) {
-        // no lo añade 
-        opt1 = opt1 + calcularResultado(AB,raiz->izquierdo,valor,k,true,casasRobadas);
-        // si lo añade
-        if (valido == true) {
-            opt2 = opt2 + calcularResultado(AB,raiz->izquierdo,valor,k,false,casasRobadas+1);
-        }
-    }
-    if (raiz->derecho != nullptr) {
-        // no lo añade 
-        opt3 = opt3 + calcularResultado(AB,raiz->derecho,valor,k,true,casasRobadas);
-        // si lo añade
-        if (valido == true) {
-            opt4 = opt4 + calcularResultado(AB,raiz->derecho,valor,k,false,casasRobadas+1);
-        }
-    }
-    if (raiz->derecho == nullptr and raiz->izquierdo == nullptr){
-        if (valido){
-            casasRobadas++;
-            if (k > casasRobadas + 1) {
-                return INT_MIN;
-            }
-            return raiz->dato;
-        }
-        if (k > casasRobadas){
-            return INT_MIN;
-        }
-        return 0;
-    }
-    
-    int noAgarro = INT_MIN;
-    if (opt1 != INT_MIN and opt3 != INT_MIN) {
-        noAgarro = opt1 + opt3;
-    }
-    
-    if (valido == false) {
-        return noAgarro;
-    }
-
-    int agarro = INT_MIN;
-    if (opt2 != INT_MIN and opt4 != INT_MIN) {
-        agarro = raiz->dato + opt2 + opt4;
-    }
-    
-    if (noAgarro > agarro) {
-        return noAgarro;
-    } else {return agarro;}
-    
-}
-
-int calcularResultado(ArbolBinario AB,int k){
-    Nodo* nodo = AB.raiz;
-    return calcularResultado(AB,nodo,0,k,true,0);
-}
-
-void crearArbol(vector<string>&arbolito,int k){
+// Funcion wrapper para llamar construir el arbol
+// @input: arbolito: Un vector con los valores del arbol
+// @output: un instancia de la clase arbol con el arbol construido
+ArbolBinario crearArbol(vector<string>&arbolito){
     ArbolBinario AB;
-    AB.raiz = AB.crearArbol(arbolito,0);
-
-    AB.inorderRecursivo(AB.raiz);
-
-
-    int resultado = calcularResultado(AB,k);
-    if (resultado > 0){
-        cout << "\n" <<resultado << endl;
-    } else {cout << "\nNo se puede resolver el problema" << endl;}
-    
-    
+    AB.raiz = AB.crearArbol(arbolito);
+    return AB;
 }
 
+// Funcion para combinar dos arreglos de recorridos 
+// @input: 
+// - A: vector con el recorrido
+// - B: segundo vector con recorrido
+// - K: numero de grupos que se quieren crear
+// @ouput: vector con los dos combinados
+vector<int> combinar(const vector<int> &_A,const vector<int> &_B, int _k ){
+    int A = _A.size(), B = _B.size();
+    int n = min(A + B - 2, _k) + 1;
+    vector<int> combinado(n, -1);
+    for(int i= 0; i < A; i++){
+        if (_A[i] == -1){continue;};
+        for (int j=0; j< B; j++){
+            if (_B[j] == -1){continue;};
+            int t = min(_k,i+j);
+            combinado[t] = max(combinado[t], _A[i] + _B[j]);
+        }
+    }
+    return combinado;
+}
+
+//Funcion que se encarga de elegir cual es la mejor combinacion dado dos arreglos
+//@input: 
+//- nr: vector con valores que toma cuando se salta el nodo actual
+//- r: vector con valores que toma cuando se roba el nodo actual
+vector<int> optimizarRuta(vector<int> &_nr, vector<int>& _r){
+    int nr = _nr.size();
+    int r = _r.size();
+    int n = max(nr,r);
+    vector<int> ruta_optimizada(n,-1);
+    for(int i = 0; i < n; i++){
+        int a = (i < nr) ? _nr[i]: -1;
+        int b = (i < r) ? _r[i]: -1;
+        ruta_optimizada[i] = max(a,b);
+    }
+    return ruta_optimizada;
+}
+struct solucion{
+    vector<int> nr;
+    vector<int> r;
+};
+
+solucion DFS(Nodo * n, int k){
+    if(n == nullptr) {return {{0}, {-1}};};
+
+    solucion izq = DFS(n->izquierdo, k);
+    solucion der = DFS(n->derecho, k);
+
+    solucion actual;
+    // saltarse el nodo actual
+    actual.nr = combinar(optimizarRuta(izq.nr, izq.r), optimizarRuta(der.nr,der.r),k);
+    // robar el nodo actual
+    vector<int> m = combinar(izq.nr, der.nr,k);
+    actual.r.assign(min((int)m.size(), k) + 1, -1);
+
+    for (int i = 0; i < (int)m.size(); i++){
+        if (m[i] != -1){
+            int t = min(k,i+1);
+            actual.r[t] = max(actual.r[t], m[i] + n->dato);
+        }
+    }
+    return actual;
+}
+
+void resolver(Nodo * raiz, int k ){
+    solucion s = DFS(raiz, k);
+    int a = (k < s.nr.size()) ? s.nr[k] : -1;
+    int b = (k < s.r.size()) ? s.r[k] : -1;
+    cout << max(a,b) << endl;
+}
+
+void printVector(vector<int>& v){
+    for(auto i: v){
+        cout << i << " ";
+    }
+    cout << endl;
+}
 
 int main(){
-    vector<pair<vector<string>,int>> ejemplos = {{{"3","2","3","null","3","null","1"},2},{{"3", "4", "5", "1", "3", "null", "1"},4},{{"1","2","3"},2},{{"4","1","null","2","null","3"},3},{{"2","1","3","null","4"},2},{{"3","1","null","null","2"},2}};
+    vector<pair<vector<string>,int>> ejemplos = {
+        {{"3","2","3","null","3","null","1"},2}, //Caso 1
+        {{"3", "4", "5", "1", "3", "null", "1"},4}, //Caso 2
+        {{"1","2","3"},2}, //caso 3
+        {{"4","1","null","2","null","3"},3}, //caso 4
+        {{"2","1","3","null","4"},2}, //caso 5
+        {{"3","1","null","null","2"},2}, //caso 6
+        {{"10","1","2","3","4","null","null","5","6"},5}, //caso 7
+        {{"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"},8} //caso 8
+    };
     for (int i = 0; i < ejemplos.size(); i++) {
-        cout << "Caso numero " << i+1 << endl;
-        crearArbol(ejemplos[i].first,ejemplos[i].second);
+        cout << "Caso numero " << i+1 << " ";
+        ArbolBinario AB = crearArbol(ejemplos[i].first);
+        resolver(AB.raiz, ejemplos[i].second);
     }
+
     return 0;
 }
