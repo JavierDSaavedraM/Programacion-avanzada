@@ -28,20 +28,25 @@ struct Nodo {
     }
 };
 
+// Clase que guarda el arbol binario a partir de su raiz
 class ArbolBinario {
 public:
     Nodo* raiz;
 
+    // Constructor de la clase, el arbol empieza vacio
     ArbolBinario() {
         raiz = nullptr;
     }
 
+    // Esta funcion construye el arbol por niveles usando una cola 
+    // @input: arbolito: vector con los valores del arbol, "null" si no hay nodo
+    // @output: apuntador a la raiz del arbol construido
     Nodo* crearArbol(const vector<string>& arbolito) {
-        if(arbolito.empty() || arbolito[0] == "null") return nullptr;
+        if(arbolito.empty() || arbolito[0] == "null") return nullptr; // validacion: arbol vacio
         Nodo* raiz = new Nodo(stoi(arbolito[0]));
         queue<Nodo *> q;
         q.push(raiz);
-        int i =1;
+        int i =1; // posicion del siguiente valor por leer en el vector
         while(!q.empty() && i < arbolito.size()){
             Nodo* cur = q.front();
             q.pop();
@@ -73,21 +78,21 @@ ArbolBinario crearArbol(vector<string>&arbolito){
     return AB;
 }
 
-// Funcion para combinar dos arreglos de recorridos 
-// @input: 
-// - A: vector con el recorrido
-// - B: segundo vector con recorrido
-// - K: numero de grupos que se quieren crear
-// @ouput: vector con los dos combinados
+// Funcion para combinar los resultados del subarbol izquierdo y derecho
+// @input:
+// - A: vector donde la posicion i es el maximo dinero robando i casas (izquierda)
+// - B: lo mismo para el subarbol derecho
+// - k: minimo de casas, las posiciones mayores a k se juntan en k
+// @output: vector con el mejor dinero para cada numero de casas combinado
 vector<int> combinar(const vector<int> &_A,const vector<int> &_B, int _k ){
     int A = _A.size(), B = _B.size();
     int n = min(A + B - 2, _k) + 1;
     vector<int> combinado(n, -1);
     for(int i= 0; i < A; i++){
-        if (_A[i] == -1){continue;};
+        if (_A[i] == -1){continue;}; // -1 significa que esa cantidad de casas no es posible
         for (int j=0; j< B; j++){
             if (_B[j] == -1){continue;};
-            int t = min(_k,i+j);
+            int t = min(_k,i+j);  // total de casas, topado en k
             combinado[t] = max(combinado[t], _A[i] + _B[j]);
         }
     }
@@ -98,6 +103,7 @@ vector<int> combinar(const vector<int> &_A,const vector<int> &_B, int _k ){
 //@input: 
 //- nr: vector con valores que toma cuando se salta el nodo actual
 //- r: vector con valores que toma cuando se roba el nodo actual
+//@output: vector con el mejor valor de cada posicion entre robar y no robar
 vector<int> optimizarRuta(vector<int> &_nr, vector<int>& _r){
     int nr = _nr.size();
     int r = _r.size();
@@ -110,13 +116,20 @@ vector<int> optimizarRuta(vector<int> &_nr, vector<int>& _r){
     }
     return ruta_optimizada;
 }
+
+// Guarda los resultados de un nodo:
+// - nr: mejor dinero por numero de casas si NO se roba el nodo
+// - r: mejor dinero por numero de casas si SI se roba el nodo
 struct solucion{
     vector<int> nr;
     vector<int> r;
 };
 
+// Recorre el arbol en postorden y calcula la solucion de cada nodo
+// @input: n: nodo actual, k: minimo de casas
+// @output: solucion con los vectores nr y r del nodo
 solucion DFS(Nodo * n, int k){
-    if(n == nullptr) {return {{0}, {-1}};};
+    if(n == nullptr) {return {{0}, {-1}};}; // caso base: nodo vacio, 0 casas con 0 dinero
 
     solucion izq = DFS(n->izquierdo, k);
     solucion der = DFS(n->derecho, k);
@@ -126,7 +139,7 @@ solucion DFS(Nodo * n, int k){
     actual.nr = combinar(optimizarRuta(izq.nr, izq.r), optimizarRuta(der.nr,der.r),k);
     // robar el nodo actual
     vector<int> m = combinar(izq.nr, der.nr,k);
-    actual.r.assign(min((int)m.size(), k) + 1, -1);
+    actual.r.assign(min((int)m.size(), k) + 1, -1); // si se roba el nodo actual, sus hijos no se pueden robar 
 
     for (int i = 0; i < (int)m.size(); i++){
         if (m[i] != -1){
@@ -137,17 +150,20 @@ solucion DFS(Nodo * n, int k){
     return actual;
 }
 
+// Calcula e imprime el maximo dinero robando al menos k casas
+// @input: raiz: raiz del arbol, k: minimo de casas
 void resolver(Nodo * raiz, int k ){
     solucion s = DFS(raiz, k);
     int a = (k < s.nr.size()) ? s.nr[k] : -1;
     int b = (k < s.r.size()) ? s.r[k] : -1;
-    int resultado = max(a,b);
-    if (resultado == -1){
+    int resultado = max(a,b); // mejor opcion entre robar o no la raiz  
+    if (resultado == -1){   // validacion: no hay forma de robar k casas
         cout << "No se pueden robar al menos " << k << " casas en este problema" << endl;
-    } else {cout << resultado << endl;}
+    } else {cout << "El resultado es:  " << resultado << endl;}
 }
 
 int main(){
+    // Casos de prueba: {arbol, k}      
     vector<pair<vector<string>,int>> ejemplos = {
         {{"3","2","3","null","3","null","1"},2}, //Caso 1
         {{"3", "4", "5", "1", "3", "null", "1"},4}, //Caso 2
@@ -175,6 +191,7 @@ int main(){
     for (int i = 0; i < ejemplos.size(); i++) {
         cout << "Caso numero " << i+1 << " ";
         ArbolBinario AB = crearArbol(ejemplos[i].first);
+        // Se mide solo el tiempo del algoritmo, sin contar la construccion del arbol 
         auto inicio = chrono::high_resolution_clock::now();
         resolver(AB.raiz, ejemplos[i].second);
         auto fin = chrono::high_resolution_clock::now();
