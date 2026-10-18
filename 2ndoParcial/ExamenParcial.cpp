@@ -11,6 +11,7 @@ Roberto De la Fuente 593303
 #include <vector>
 #include <string>
 #include <utility>
+#include <chrono>
 using namespace std;
 
 // Definición de la estructura del nodo
@@ -162,7 +163,10 @@ void resolver(Nodo * raiz, int k ){
     solucion s = DFS(raiz, k);
     int a = (k < s.nr.size()) ? s.nr[k] : -1;
     int b = (k < s.r.size()) ? s.r[k] : -1;
-    cout << max(a,b) << endl;
+    int resultado = max(a,b);
+    if (resultado == -1){
+        cout << "No se pueden robar al menos " << k << " casas en este problema" << endl;
+    } else {cout << resultado << endl;}
 }
 
 void printVector(vector<int>& v){
@@ -183,10 +187,29 @@ int main(){
         {{"10","1","2","3","4","null","null","5","6"},5}, //caso 7
         {{"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"},8} //caso 8
     };
+    // Caso 9: lista de 1,000 nodos hacia la derecha -> [1, null, 2, null, 3, ..., 1000]
+    vector<string> caso9;
+    for (int i = 1; i < 1001; i++) {
+        caso9.push_back(to_string(i));
+        if (i != 1000){
+            caso9.push_back("null");
+        }
+    }
+    ejemplos.push_back({caso9, 500});
+
+    // Caso 10: árbol completo de 10,000 nodos, todos con valor 1
+    vector<string> caso10(10000, "1");
+    ejemplos.push_back({caso10, 5000});
+
     for (int i = 0; i < ejemplos.size(); i++) {
         cout << "Caso numero " << i+1 << " ";
         ArbolBinario AB = crearArbol(ejemplos[i].first);
+        auto inicio = chrono::high_resolution_clock::now();
         resolver(AB.raiz, ejemplos[i].second);
+        auto fin = chrono::high_resolution_clock::now();
+
+        auto duracion = chrono::duration_cast<chrono::microseconds>(fin - inicio);
+        cout << "Tiempo: " << duracion.count() << " microsegundos" << endl;
     }
 
     return 0;
