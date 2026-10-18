@@ -35,9 +35,6 @@ public:
     ArbolBinario() {
         raiz = nullptr;
     }
-    ~ArbolBinario(){
-        destruirArbol(raiz);
-    }
 
     Nodo* crearArbol(const vector<string>& arbolito) {
         if(arbolito.empty() || arbolito[0] == "null") return nullptr;
@@ -64,25 +61,6 @@ public:
             }
         }
         return raiz;
-    }
-
-    void inorderRecursivo(Nodo* raiz) {
-        if (raiz == nullptr) {
-            return;
-        }
-        inorderRecursivo(raiz->izquierdo); // 1. Izquierda
-        cout << raiz->dato << " ";    // 2. Raíz (Procesar)
-        inorderRecursivo(raiz->derecho);   // 3. Derecha
-    }
-private:
-    void destruirArbol(Nodo* nodo) {
-        if (nodo == nullptr) {
-            return;
-        }
-
-        destruirArbol(nodo->izquierdo);
-        destruirArbol(nodo->derecho);
-        delete nodo;
     }
 };
 
@@ -167,13 +145,6 @@ void resolver(Nodo * raiz, int k ){
     if (resultado == -1){
         cout << "No se pueden robar al menos " << k << " casas en este problema" << endl;
     } else {cout << resultado << endl;}
-}
-
-void printVector(vector<int>& v){
-    for(auto i: v){
-        cout << i << " ";
-    }
-    cout << endl;
 }
 
 int main(){
