@@ -23,16 +23,16 @@ void probar(const vector<int>& stones) {
         else if (stone % 1 != 0) decimal_switch = true; // Illegal number
     }
     if (negative_switch) {
-        cout << "-> Algun numero es negativo" << endl;
+        cout << "-> Illegal por tener un numero negativo" << endl;
         return;
     } else if (decimal_switch) {
-        cout << " -> Algun numero no es entero" << endl;
+        cout << " -> Illegal al tener un numero decimal" << endl;
         return;
     }
 
-    if (n == 0)                 cout << "-> Falso por lista vacia" << endl; 
-    else if (n % 2 == 1)        cout << "-> Falso por numero impar de grupos de piedras (tamano = " << n << ")" << endl;
-    else if (total % 2 == 0)    cout << "-> Falso por cantidad total par de piedras (total = " << total << ")" << endl;
+    if (n == 0)                 cout << "-> Imposible por lista vacia" << endl; 
+    else if (n % 2 == 1)        cout << "-> Illegal por numero impar de grupos de piedras (tamano = " << n << ")" << endl;
+    else if (total % 2 == 0)    cout << "-> Illegal por cantidad total par de piedras (total = " << total << ")" << endl;
     else                        cout << "-> Verdadero" << endl; // There will always be a strategy to win.
 }
 
